@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">DolMengE</string>
+
+    <string name="defaulttitme">BluetoothList</string>
+    <string name="scanning">단말을 검색중입니다...</string>
+    <string name="select_device">연결할 단말을 선택하세요.</string>
+    <string name="none_paired">페어링된 단말을 찾을 수 없습니다.</string>
+    <string name="none_found">단말을 찾을 수 없습니다.</string>
+    <string name="title_paired_devices">페어링된 단말</string>
+    <string name="title_other_devices">사용가능한 다른 단말</string>
+    <string name="button_scan">단말 검색하기</string>
+
+    <string name="secure_connect">단말 연결하기 - (Secure 모드)</string>
+    <string name="insecure_connect">단말 연결하기 - (Insecure 모드)</string>
+    <string name="discoverable">이 단말을 검색가능한 상태로 만들기</string>
+    <string name="waiting">waiting plz</string>
+</resources>
