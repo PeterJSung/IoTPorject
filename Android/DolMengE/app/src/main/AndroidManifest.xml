@@ -40,8 +40,7 @@
 
         <activity
             android:name=".WaterPurifyActivity"
-            android:theme="@android:style/Theme.Dialog"
-            android:configChanges="orientation|keyboardHidden">
+            android:theme="@style/ThemeWithCorners">
         </activity>
 
         <provider

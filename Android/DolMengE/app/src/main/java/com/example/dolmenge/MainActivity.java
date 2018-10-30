@@ -89,8 +89,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 animateFAB();
                 break;
             case R.id.fab_child_BT:
-                Intent serverIntent = new Intent(getApplicationContext(), DeviceListActivity.class);
-                startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+                Intent btIntent = new Intent(getApplicationContext(), DeviceListActivity.class);
+                startActivityForResult(btIntent, REQUEST_CONNECT_DEVICE);
                 Log.d("SJM", "CALLING BT LIST");
                 break;
             case R.id.fab_child_CAMERA:
@@ -102,7 +102,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 Log.d("SJM", "CALLING GALLERY");
                 break;
             case R.id.fab_child_WATER_PURIFY:
-                cameraController.callGallary();
+                Intent wpIntent = new Intent(getApplicationContext(), WaterPurifyActivity.class);
+                startActivity(wpIntent);
                 Log.d("SJM", "CALLING WATER PURIFY");
                 break;
             case R.id.fab_child_FACE:

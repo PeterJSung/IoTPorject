@@ -12,4 +12,9 @@
         <item name="android:windowTranslucentStatus">true</item>
     </style>
 
+    <style name="ThemeWithCorners" parent="android:Theme.Dialog">
+        <item name="android:windowBackground">@drawable/round_activity</item>
+    </style>
+
+
 </resources>

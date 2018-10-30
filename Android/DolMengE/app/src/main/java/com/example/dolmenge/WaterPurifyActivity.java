@@ -14,9 +14,13 @@ import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -29,7 +33,17 @@ public class WaterPurifyActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        setContentView(R.layout.activity_water_purify);
+
+        ImageButton scanButton = (ImageButton) findViewById(R.id.water_purify_btn);
+        scanButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Log.d("SJM","CALLING");
+            }
+        });
 
     }
 }
