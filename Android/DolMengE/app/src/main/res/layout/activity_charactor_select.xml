@@ -1,16 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:id="@+id/activity_char_root_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:layout_centerInParent="true"
-    tools:context=".WaterPurifyActivity">
+    android:orientation="vertical"
+    tools:context=".CharatorSelectActivity">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <!--android:layout_weight="3"-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="3"
+            android:orientation="horizontal">
+            <LinearLayout
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:orientation="vertical">
+                <!--
+                <Button
+                    android:layout_width="150px"
+                    android:layout_height="150px"
+                    android:text="A"/>
+                <Button
+                    android:layout_width="150px"
+                    android:layout_height="150px"
+                    android:text="B"/>-->
+                <com.daimajia.slider.library.SliderLayout
+                    android:id="@+id/slider"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    />
 
-    <ImageButton
-        android:id="@+id/water_purify_btn"
-        android:layout_width="240px"
-        android:layout_height="240px"
-        android:layout_gravity="center"
-        android:background="@drawable/water_purify"/>
-</FrameLayout>
+                <com.daimajia.slider.library.Indicators.PagerIndicator
+                    android:id="@+id/custom_indicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!--
+        <com.daimajia.slider.library.SliderLayout
+            android:id="@+id/slider"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.daimajia.slider.library.Indicators.PagerIndicator
+            android:id="@+id/custom_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center" />-->
+        <Button
+            android:id="@+id/apply_charactor"
+            android:background="@drawable/round_button"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="1"
+            android:text="Select">
+
+        </Button>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+    </LinearLayout>
+</LinearLayout>

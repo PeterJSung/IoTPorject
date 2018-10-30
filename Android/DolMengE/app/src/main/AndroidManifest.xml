@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-feature android:name="android.hardware.camera2" />
 
     <application
@@ -40,6 +42,11 @@
 
         <activity
             android:name=".WaterPurifyActivity"
+            android:theme="@style/ThemeWithCorners">
+        </activity>
+
+        <activity
+            android:name=".CharatorSelectActivity"
             android:theme="@style/ThemeWithCorners">
         </activity>
 

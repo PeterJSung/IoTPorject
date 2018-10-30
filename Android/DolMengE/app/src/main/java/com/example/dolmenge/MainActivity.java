@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -68,11 +69,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private CameraController cameraController;
 
+    private ImageView imageView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Point currentScreenSize = getScreenSize(this);
+        GlobalData.SCREEN_SIZE.x = currentScreenSize.x;
+        GlobalData.SCREEN_SIZE.y = currentScreenSize.y;
 
+        setupLayout();
         setupMainScreen();
         setupBluetooth();
         setupFAB();
@@ -103,11 +109,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             case R.id.fab_child_WATER_PURIFY:
                 Intent wpIntent = new Intent(getApplicationContext(), WaterPurifyActivity.class);
-                startActivity(wpIntent);
+                startActivityForResult(wpIntent,GlobalData.REQUEST_ACTIVITY_CODE_WATER_PURIFY);
                 Log.d("SJM", "CALLING WATER PURIFY");
                 break;
             case R.id.fab_child_FACE:
-                cameraController.callGallary();
+                Intent ciIntent = new Intent(getApplicationContext(), CharatorSelectActivity.class);
+                startActivityForResult(ciIntent,GlobalData.REQUEST_ACTIVITY_CODE_CHAR_SELECT);
                 Log.d("SJM", "CALLING FACE");
                 break;
         }
@@ -273,12 +280,35 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
+        animateFAB();
         switch (requestCode) {
             case REQUEST_CONNECT_DEVICE:
 
                 if (resultCode == Activity.RESULT_OK) {
                     connectDevice(data);
+                }
+                break;
+            case GlobalData.REQUEST_ACTIVITY_CODE_CHAR_SELECT:
+                if (resultCode == Activity.RESULT_OK) {
+                    int id  = data.getIntExtra("SELECTED",0);
+                    imageView.setImageResource(id);
+                    switch (id) {
+                        case R.drawable.potchar1:
+                            Log.d("SJM", "SELECTED CHAR1");
+                            break;
+                        case R.drawable.potchar2:
+                            Log.d("SJM", "SELECTED CHAR2");
+                            break;
+                        case R.drawable.potchar3:
+                            Log.d("SJM", "SELECTED CHAR3");
+                            break;
+                        case R.drawable.potchar4:
+                            Log.d("SJM", "SELECTED CHAR4");
+                            break;
+                        case R.drawable.potchar5:
+                            Log.d("SJM", "SELECTED CHAR5");
+                            break;
+                    }
                 }
                 break;
         }
@@ -346,5 +376,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
         for (FloatingActionButton eachChildFAB: fab_child) {
             eachChildFAB.setOnClickListener(this);
         }
+    }
+
+    private void setupLayout(){
+        imageView = (ImageView)findViewById(R.id.potImage);
+    }
+
+    private Point getScreenSize(Activity activity) {
+        Display display = activity.getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return  size;
     }
 }
