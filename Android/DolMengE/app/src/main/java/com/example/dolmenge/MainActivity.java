@@ -1,5 +1,7 @@
 package com.example.dolmenge;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -7,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
@@ -19,6 +22,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -71,12 +76,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private ImageView potView;
     private ImageView emotionView;
+    private View progressOverlay;
+    private TextView statusTextView = null;
 
     private SharedPreferences pref = null;
 
     private Thread renderMain = null;
 
     private boolean isBTConnected = false;
+
+    private ProgressBar progressBar;
+
+    private boolean isOverlayed = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,6 +115,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         } else {
             //SAVED Address 있을경우.
             initConnection(savedAddress);
+            setLoadingImage(true, "Try to Connect");
         }
 
         renderMain = new Thread(new Runnable() {
@@ -120,6 +132,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                         }
                     });
                     try{
+                        mChatService.write(S2BA(new String("E")));
                         Thread.sleep(30000);
                         //30초마다 렌더링
                     } catch (Exception e){
@@ -143,6 +156,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
                         break;
                     }
                     if(isBTConnected){
+                        runOnUiThread(new Runnable(){
+                            @Override
+                            public void run() {
+                                setLoadingImage(true,"Loading Data");
+                            }
+                        });
                         mChatService.write(S2BA(new String("E")));
                         break;
                     }
@@ -227,6 +246,35 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
             String dataSplited = Data.substring(1);
             int data = Integer.parseInt(dataSplited);
+            Log.d("SJM","RECEIVE DATA = " + data);
+            if(data > 1000){
+                emotionView.setImageResource(R.drawable.e1);
+                data = 1000;
+            } else if(data <= 1000 && data > 850){
+                emotionView.setImageResource(R.drawable.e2);
+            } else if(data <= 850 && data > 700){
+                emotionView.setImageResource(R.drawable.e3);
+            }else if(data <= 700 && data > 550){
+                emotionView.setImageResource(R.drawable.e4);
+            }else if(data <= 550){
+                emotionView.setImageResource(R.drawable.e5);
+                data = 550;
+            }
+            //1000 == 0 550 == 100
+            double a = -((double)2/9);
+            double b = ((double)222.22);
+            int per = 0;
+            if( data == 1000){
+                per = 0;
+            } else if( data == 550){
+                per = 100;
+            }
+            else{
+                per = (int)(a*data + b);
+            }
+
+            String printText = "Humidity : " + per + "%";
+            setLoadingImage(false,printText);
         }
     }
 
@@ -242,6 +290,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             //  setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
                             //  mConversationArrayAdapter.clear();
                             isBTConnected = true;
+                            setLoadingImage(true,"Connect Complete");
                             break;
                         case BluetoothChatService.STATE_CONNECTING:
                             Log.d("SJM", "BluetoothChatService.STATE_CONNECTING");
@@ -252,6 +301,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                         case BluetoothChatService.STATE_NONE:
                             Log.d("SJM", "BluetoothChatService.STATE_NONE");
                             //setStatus(R.string.title_not_connected);
+                            setLoadingImage(false, "Connected None");
                             break;
                     }
                     break;
@@ -313,6 +363,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     Log.d("SJM", "BluetoothChatService.CONNECTION_LOST");
                     //Log.d("dd", "susin");
                     isBTConnected = false;
+                    setLoadingImage(false,"Connect Lost");
                     break;
             }
         }
@@ -419,9 +470,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         //pref.getString("ADDRESS", currentBluetoothAddress);
-        /*
-
-        */
     }
 
     private void setupMainScreen(){
@@ -466,6 +514,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private void setupLayout(){
         potView = (ImageView)findViewById(R.id.potImage);
         emotionView = (ImageView)findViewById(R.id.emotionImage);
+        statusTextView = (TextView)findViewById(R.id.status_text);
+        progressOverlay = (View) findViewById(R.id.progress_overlay);
+        progressBar = (ProgressBar) findViewById(R.id.progressMAINBAR);
+        progressBar.getIndeterminateDrawable().setColorFilter(Color.rgb(60,179,113), PorterDuff.Mode.MULTIPLY);
+        setLoadingImage(false, "");
     }
 
     private Point getScreenSize(Activity activity) {
@@ -475,7 +528,37 @@ public class MainActivity extends Activity implements View.OnClickListener {
         return  size;
     }
 
-    private byte[] S2BA(String data){
+    public static byte[] S2BA(String data){
         return data.getBytes();
+    }
+
+    private void setLoadingImage(boolean overLayon, String msg){
+        if(isOverlayed != overLayon){
+            if(overLayon){
+                animateView(progressOverlay, View.VISIBLE, 0.4f, 200);
+            } else {
+                animateView(progressOverlay, View.GONE, 0, 200);
+            }
+            isOverlayed = overLayon;
+        }
+
+        statusTextView.setText(msg);
+    }
+
+    private void animateView(final View view, final int toVisibility, float toAlpha, int duration) {
+        boolean show = toVisibility == View.VISIBLE;
+        if (show) {
+            view.setAlpha(0);
+        }
+        view.setVisibility(View.VISIBLE);
+        view.animate()
+                .setDuration(duration)
+                .alpha(show ? toAlpha : 0)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        view.setVisibility(toVisibility);
+                    }
+                });
     }
 }
