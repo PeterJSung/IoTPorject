@@ -24,12 +24,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 public class WaterPurifyActivity extends Activity {
 
+    static int a = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +43,10 @@ public class WaterPurifyActivity extends Activity {
         ImageButton scanButton = (ImageButton) findViewById(R.id.water_purify_btn);
         scanButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Log.d("SJM","CALLING");
+                BigInteger bi = BigInteger.valueOf(a);
+                byte[] bytes = bi.toByteArray();
+                MainActivity.mChatService.write(bytes);
+                a++;
             }
         });
 

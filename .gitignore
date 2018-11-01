@@ -34,14 +34,14 @@ Android/.navigation/
 Android/captures/
 
 # IntelliJ
-Android/*.iml
-Android/.idea/workspace.xml
-Android/.idea/tasks.xml
-Android/.idea/gradle.xml
-Android/.idea/assetWizardSettings.xml
-Android/.idea/dictionaries
-Android/.idea/libraries
-Android/.idea/caches
+Android/DolMengE/*.iml
+Android/DolMengE/.idea/workspace.xml
+Android/DolMengE/.idea/tasks.xml
+Android/.DolMengE/idea/gradle.xml
+Android/DolMengE/.idea/assetWizardSettings.xml
+Android/DolMengE/.idea/dictionaries
+Android/DolMengE/.idea/libraries
+Android/DolMengE/.idea/caches
 
 # Keystore files
 # Uncomment the following lines if you do not want to check your keystore files in.

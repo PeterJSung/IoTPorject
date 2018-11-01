@@ -48,7 +48,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private final int REQUEST_CONNECT_DEVICE = 1;
 
-    private BluetoothChatService mChatService = null;
+    public static BluetoothChatService mChatService = null;
 
     public static final int MESSAGE_STATE_CHANGE = 1;
     public static final int MESSAGE_READ = 2;
@@ -69,7 +69,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private CameraController cameraController;
 
-    private ImageView imageView;
+    private ImageView potView;
+    private ImageView emotionView;
+
+    private SharedPreferences pref = null;
+
+    private Thread renderMain = null;
+
+    private boolean isBTConnected = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,7 +90,73 @@ public class MainActivity extends Activity implements View.OnClickListener {
         setupBluetooth();
         setupFAB();
         setupCamera();
-        RenderingFuntion(-1,-1,-1,-1);
+        init();
+    }
+
+    private void init(){
+        //Connection Address Check
+        pref= getSharedPreferences("pref", MODE_PRIVATE);
+        final String savedAddress = pref.getString("ADDRESS",null);
+
+        if(savedAddress == null){
+            //NULL 일 경우
+            //그냥 기다림.
+        } else {
+            //SAVED Address 있을경우.
+            initConnection(savedAddress);
+        }
+
+        renderMain = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+
+                while(true){
+                    runOnUiThread(new Runnable(){
+                        @Override
+                        public void run() {
+                            RenderingFuntion(-1,-1,-1,-1);
+                            // 해당 작업을 처리함
+                        }
+                    });
+                    try{
+                        Thread.sleep(30000);
+                        //30초마다 렌더링
+                    } catch (Exception e){
+
+                    }
+                }
+            }
+        });
+        renderMain.start();
+    }
+
+    private void initConnection(final String savedAddress){
+        Thread th = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                openBluetoothSocket(savedAddress);
+                int count = 0;
+                while(true){
+                    count++;
+                    if(count > 10){
+                        break;
+                    }
+                    if(isBTConnected){
+                        mChatService.write(S2BA(new String("E")));
+                        break;
+                    }
+                    try{
+                        Thread.sleep(10000);
+                    }catch (Exception e){
+                        Log.d("ERR","CRASH " + e);
+                    } finally {
+
+                    }
+                }
+            }
+        });
+        th.start();
     }
 
     @Override
@@ -144,8 +217,17 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    public void doingAction(){
+    public void doingAction(String Data){
+        Log.d("SJM","ACTION CODE = " + Data);
 
+        if(Data.charAt(0) == 'e'){
+            int id =  pref.getInt("CHAR",0);
+            Log.d("SJM","GET CHAR CODE = " + id);
+            potView.setImageResource(id == 0 ? R.drawable.potchar1 : id);
+
+            String dataSplited = Data.substring(1);
+            int data = Integer.parseInt(dataSplited);
+        }
     }
 
     public final Handler mHandler = new Handler() {
@@ -159,6 +241,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             Log.d("SJM", "BluetoothChatService.STATE_CONNECTED");
                             //  setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
                             //  mConversationArrayAdapter.clear();
+                            isBTConnected = true;
                             break;
                         case BluetoothChatService.STATE_CONNECTING:
                             Log.d("SJM", "BluetoothChatService.STATE_CONNECTING");
@@ -186,8 +269,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     for(int i = 0 ; i < readMessage.length(); i++) {
                         char data = readMessage.charAt(i);
                         if(data == '#'){
+                            doingAction(receiveData);
+                            Log.d("SJM","COMPLETE STRING = " + receiveData);
                             receiveData = new String();
-                            doingAction();
                         } else {
                             receiveData += data;
                         }
@@ -228,6 +312,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 case CONNECTION_LOST:
                     Log.d("SJM", "BluetoothChatService.CONNECTION_LOST");
                     //Log.d("dd", "susin");
+                    isBTConnected = false;
                     break;
             }
         }
@@ -291,24 +376,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
             case GlobalData.REQUEST_ACTIVITY_CODE_CHAR_SELECT:
                 if (resultCode == Activity.RESULT_OK) {
                     int id  = data.getIntExtra("SELECTED",0);
-                    imageView.setImageResource(id);
-                    switch (id) {
-                        case R.drawable.potchar1:
-                            Log.d("SJM", "SELECTED CHAR1");
-                            break;
-                        case R.drawable.potchar2:
-                            Log.d("SJM", "SELECTED CHAR2");
-                            break;
-                        case R.drawable.potchar3:
-                            Log.d("SJM", "SELECTED CHAR3");
-                            break;
-                        case R.drawable.potchar4:
-                            Log.d("SJM", "SELECTED CHAR4");
-                            break;
-                        case R.drawable.potchar5:
-                            Log.d("SJM", "SELECTED CHAR5");
-                            break;
-                    }
+
+                    SharedPreferences.Editor editor = pref.edit();// editor에 put 하기
+                    editor.putInt("CHAR",id); //First라는 key값으로 id 데이터를 저장한다.
+                    editor.commit(); //완료한다.
+                    potView.setImageResource(id);
                 }
                 break;
         }
@@ -320,7 +392,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
         // Get the BluetoothDevice object
         currentBluetoothAddress = new String(address);
-        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+        //BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+        // Attempt to connect to the device
+        //mChatService.connect(device);
+        //openBluetoothSocket(currentBluetoothAddress);
+        initConnection(currentBluetoothAddress);
+        SharedPreferences.Editor editor = pref.edit();// editor에 put 하기
+        editor.putString("ADDRESS",currentBluetoothAddress); //First라는 key값으로 id 데이터를 저장한다.
+        editor.commit(); //완료한다.
+    }
+
+    private void openBluetoothSocket(String blAddress){
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(blAddress);
         // Attempt to connect to the device
         mChatService.connect(device);
     }
@@ -335,8 +418,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mChatService = new BluetoothChatService(this, mHandler);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        SharedPreferences settings = getSharedPreferences(PREFS_BLUETOOTH, 0);
-        settings.getString("ADDRESS", currentBluetoothAddress);
+        //pref.getString("ADDRESS", currentBluetoothAddress);
+        /*
+
+        */
     }
 
     private void setupMainScreen(){
@@ -379,7 +464,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     private void setupLayout(){
-        imageView = (ImageView)findViewById(R.id.potImage);
+        potView = (ImageView)findViewById(R.id.potImage);
+        emotionView = (ImageView)findViewById(R.id.emotionImage);
     }
 
     private Point getScreenSize(Activity activity) {
@@ -387,5 +473,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         Point size = new Point();
         display.getSize(size);
         return  size;
+    }
+
+    private byte[] S2BA(String data){
+        return data.getBytes();
     }
 }
