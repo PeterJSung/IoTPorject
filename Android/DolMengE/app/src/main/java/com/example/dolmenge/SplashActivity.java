@@ -108,6 +108,8 @@ public class SplashActivity extends Activity {
             waitUntilLoop = true;
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent,REQUEST_ENABLE_BT);
+
+
             SetStatus(15,"블루투스가 초기화 중...");
             while(waitUntilLoop){
 
@@ -152,7 +154,11 @@ public class SplashActivity extends Activity {
         Log.d("SJM", "feture = " + pmg.hasSystemFeature(PackageManager.FEATURE_CAMERA));
         Log.d("SJM", "camera = " + cameraPermission);
         if(pmg.hasSystemFeature(PackageManager.FEATURE_CAMERA) && cameraPermission){
-            SetStatus(66,"카메라 활성화 완료.");
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    SetStatus(66,"카메라 활성화 완료.");
+                }
+            });
         } else {
             ret.isFailed = true;
             ret.msg = "카메라를 실행 시킬 수 없습니다.";
@@ -189,7 +195,11 @@ public class SplashActivity extends Activity {
             }
 
             if(files.exists()){
-                SetStatus(100,"저장소 체크 완료.");
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        SetStatus(100,"저장소 체크 완료.");
+                    }
+                });
             } else {
                 ret.isFailed = true;
                 ret.msg = "저장소 생성 실패.";
